@@ -27,10 +27,9 @@ def upload(request):
         saved_files = []
         if len(request.FILES.getlist("file[]")) > 50:
             error_message = "Too many files"
-        elif:
-	    if len(request.FILES.getlist("file[]" < 1:
-	        error_message = "Upload a file"
-	else:
+        elif len(request.FILES.getlist("file[]")) < 1:
+            error_message = "Upload a file"
+        else:
             try:
                 saved_files = save_file(request.FILES.getlist("file[]"),request.POST.get("name", "").strip(),user_ip)
                 links = [f"/uploads/{file.stash_name}" for file in saved_files]
