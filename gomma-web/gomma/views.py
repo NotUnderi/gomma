@@ -11,15 +11,15 @@ import mimetypes
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-MAX_SIZE = 1024 * 1024 * 1024 
+MAX_SIZE = 1024 * 1024 * 1024 #1024mb
 letters = string.ascii_lowercase
 
 def upload(request):
     message=""
     links=[]
     saved_files = []  
-    csrf_token = get_token(request)
     user_ip = get_client_ip(request)
+
     if request.method == "POST":
         saved_files = []
         if len(request.FILES.getlist("file[]")) > 50:
@@ -36,12 +36,11 @@ def upload(request):
                 mime_type = mime_type or 'application/octet-stream'
 
 
-                user_specified_name = request.POST.get("name", "").strip()
+                stash_name = request.POST.get("name", "").strip()
 
-                if not user_specified_name :
+                if not stash_name :
                     stash_name = ''.join(random.choice(letters) for i in range(5))
-                else:
-                    stash_name = user_specified_name
+
                 file_path = os.path.join(UPLOAD_DIR, stash_name)    
 
                 while os.path.exists(file_path):
@@ -73,14 +72,13 @@ def upload(request):
                 )
                 saved_files.append(uploaded_file)
                 links.append(f"localhost:8000/uploads/{filename}")
+
             links = [f"/uploads/{file.stash_name}" for file in saved_files]
             if saved_files:
                 message = f"Uploaded {len(saved_files)} file(s) successfully."
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
-    total_size = sum(
-    os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
-
+    total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
     user_files = UploadedFile.objects.filter(ip_address=user_ip).order_by('-uploaded_at')[:10]
     return render(request, "upload.html", {
         "message": message,
