@@ -16,6 +16,7 @@ letters = string.ascii_lowercase
 
 def upload(request):
     message=""
+    error_message=""
     links=[]
     saved_files = []  
     user_ip = get_client_ip(request)
@@ -23,12 +24,12 @@ def upload(request):
     if request.method == "POST":
         saved_files = []
         if len(request.FILES.getlist("file[]")) > 50:
-            message = "Too many files"
+            error_message = "Too many files"
         else:
             for f in request.FILES.getlist("file[]"):
 
                 if f.size > MAX_SIZE:
-                    message = f"File {f.name} too large"
+                    error_message = f"File {f.name} too large"
                     break
                 
                 filename = f.name
@@ -82,6 +83,7 @@ def upload(request):
     user_files = UploadedFile.objects.filter(ip_address=user_ip).order_by('-uploaded_at')[:10]
     return render(request, "upload.html", {
         "message": message,
+        "error_message": error_message
         "uploaded_files": saved_files,
         "links": links,
         "user_files": user_files[:10],

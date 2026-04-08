@@ -36,35 +36,46 @@
                             <label>Name:</label>
                             <input type="text" name="name" placeholder="[Leave empty for random]" class="form-control" minlength="1" maxlength="32">
                             <small class="form-text text-muted">
-                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
+                                <b>3-32 characters</b6X>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
                             </small>
                         </div>
                         <input type="submit" name="upload" value="Upload" class="btn btn-success btn-block my-3">
                     </form>
+                    {% if error_message %}
+                    <div class="alert alert-danger mt-3">{{ error_message }}</div>
+                    {% endif %}
                     {% if message %}
-                        <div class="alert alert-success mt-3">{{ message }}</div>
-                        <table class="table table-striped mt-2">
-                            <thead>
-                                <tr>
-                                    <th>Filename</th>
-                                    <th>Size</th>
-                                    <th>MD5</th>
-                                    <th>SHA256</th>
-                                    <th>Uploaded At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for file in uploaded_files %}
-                                <tr>
-                                    <td><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></td>
-                                    <td>{{ file.size|filesizeformat }}</td>
-                                    <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
-                                    <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
-                                    <td>{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div class="alert alert-success mt-3">{{ message }}</div>
+                    <table class="table table-striped mt-2">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Size</th>
+                                <th>MD5</th>
+                                <th>SHA256</th>
+                                <th>Uploaded At</th>
+                                <th>Actions</th> <!-- New column for buttons -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in uploaded_files %}
+                            <tr>
+                                <td>{{ file.filename }}</td>
+                                <td>{{ file.size|filesizeformat }}</td>
+                                <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
+                                <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
+                                <td>{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
+                                <td>
+                                    <!-- Open link -->
+                                    <a href="/f/{{ file.stash_name }}" target="_blank" class="btn btn-sm btn-primary mb-1">Open Link</a>
+                                    
+                                    <!-- Copy link -->
+                                    <button class="btn btn-sm btn-secondary mb-1" onclick="copyLink('/f/{{ file.stash_name }}')">Copy Link</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                     {% endif %}
                 </div>
             </div>
@@ -110,6 +121,15 @@ function updateFileField(){
     } else{
         $("#filesdesc").html(numFiles+" files selected");
     }
+}
+</script>
+<script>
+function copyLink(link){
+    navigator.clipboard.writeText(window.location.origin + link).then(function() {
+        alert("Copied to clipboard: " + window.location.origin + link);
+    }, function(err) {
+        alert("Failed to copy: " + err);
+    });
 }
 </script>
 </body>
