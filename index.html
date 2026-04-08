@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a href="/" class="navbar-brand">Gömma</a>
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item mx-1"><a href="/" class="nav-link">Gömma</a></li>
+            <li class="nav-item mx-1"><a href="/gomma/" class="nav-link">Gömma</a></li>
         </ul>
     </nav>
 
@@ -28,8 +28,8 @@
                 <div class="card">
                     <div class="card-header">Upload to Gömma</div>
                     <div class="card-body">
-                        <form method="post" action="/" enctype="multipart/form-data">
-                            {% csrf_token %}
+                        <form method="post" action="/gomma/" enctype="multipart/form-data">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="G9peoY7Ttlh3x1G2UuTh6PvRT4JhRfnTWmiYlqVhHiKUsX6ebOEMAdbvpde7Dv3i">
                             <div class="custom-file mb-3">
                                 <input type="file" id="fileinput" multiple name="file[]" onchange="updateFileField()" class="btn custom-file-input">
                                 <label class="custom-file-label" id="filesdesc">Choose files to upload</label>
@@ -38,55 +38,14 @@
                                 <label>Name:</label>
                                 <input type="text" name="name" placeholder="[Leave empty for random]" class="form-control" minlength="1" maxlength="32">
                                 <small class="form-text text-muted">
-                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>gm.hehexd.fi/f/[namehere]</b> )
+                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
                             </small>
                             </div>
                             <input type="submit" name="upload" value="Upload" class="btn btn-success btn-block my-3">
                         </form>
-                        {% if error_message %}
-                        <div class="alert alert-danger mt-3">{{ error_message }}</div>
-                        {% endif %} 
-                        {% if message %} 
-                        <div class="alert alert-success mt-3">{{ message }}</div>
-                        {% endif %}
-                        {% if uploaded_files %}
-                        <div class="mt-3">
-                            <h5>Actions:</h5>
-                            {% for file in uploaded_files %}
-                            <div class="mb-2">
-                                <a href="/f/{{ file.stash_name }}" target="_blank" class="btn btn-sm btn-primary mb-1">Download</a>
-
-                                <button type="button" class="btn copy-btn btn-sm btn-secondary mb-1" data-clipboard-text="{{ request.scheme }}://{{ request.get_host }}/f/{{ file.stash_name }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link">
-                                Copy Link
-                            </button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="table-responsive">
-                        <table class="table table-striped mt-2">
-                            <thead>
-                                <tr>
-                                    <th>Filename</th>
-                                    <th>Size</th>
-                                    <th>MD5</th>
-                                    <th>SHA256</th>
-                                    <th>Uploaded At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for file in uploaded_files %}
-                                <tr>
-                                    <td>{{ file.filename }}</td>
-                                    <td>{{ file.size|filesizeformat }}</td>
-                                    <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
-                                    <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
-                                    <td>{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        </div>
-                        {% endif %}
+                         
+                        
+                        
                     </div>
                 </div>
             </div>
@@ -97,8 +56,8 @@
 				<div class="col-12">
 					<div class="card">
 						<div class="card-body">
-							<p>Uploads: <b>{{ total_uploads }}</b></p>
-                            <p>Data stored: <b>{{ total_size|filesizeformat }}</b></p>
+							<p>Uploads: <b>0</b></p>
+                            <p>Data stored: <b>0 bytes</b></p>
 						</div>
 					</div>
 				</div>
@@ -116,12 +75,7 @@
 								</tr>
 							</thead>
 							<tbody>
-							{% for file in user_files %}
-                                    <tr>
-                                        <th scope="row"><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></th>
-                                        <td>{{ file.size|filesizeformat }}</td>
-                                    </tr>
-                            {% endfor %}
+							
 							</tbody>
 						</table>
 					</div>
