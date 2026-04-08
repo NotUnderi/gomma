@@ -11,7 +11,7 @@ import mimetypes
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-MAX_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_SIZE = 1024 * 1024 * 1024 
 letters = string.ascii_lowercase
 
 def upload(request):
