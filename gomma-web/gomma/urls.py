@@ -23,5 +23,5 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('gomma/',views.upload, name="upload"),
-    path("f/<str:file_name>/", views.f, name="f"),
+    path("f/<str:stash_name>/", views.f, name="f"),
 ]    

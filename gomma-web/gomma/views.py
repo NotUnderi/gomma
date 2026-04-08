@@ -31,24 +31,22 @@ def upload(request):
                     message = f"File {f.name} too large"
                     break
                 
-                
-                mime_type, _ = mimetypes.guess_type(f.name)
-                print(f.name)
-                print(mime_type)
+                filename = f.name
+                mime_type, _ = mimetypes.guess_type(filename)
                 mime_type = mime_type or 'application/octet-stream'
 
 
                 user_specified_name = request.POST.get("name", "").strip()
 
                 if not user_specified_name :
-                    filename = ''.join(random.choice(letters) for i in range(5))
+                    stash_name = ''.join(random.choice(letters) for i in range(5))
                 else:
-                    filename = user_specified_name
-                file_path = os.path.join(UPLOAD_DIR, filename)    
+                    stash_name = user_specified_name
+                file_path = os.path.join(UPLOAD_DIR, stash_name)    
 
                 while os.path.exists(file_path):
-                    filename = filename + str(random.randrange(1,10))
-                    file_path = os.path.join(UPLOAD_DIR, filename)
+                    stash_name = stash_name + str(random.randrange(1,10))
+                    file_path = os.path.join(UPLOAD_DIR, stash_name)
                 
                 # Save file to disk
                 with open(file_path, "wb+") as destination:
@@ -67,6 +65,7 @@ def upload(request):
                 uploaded_file = UploadedFile.objects.create(
                     ip_address = user_ip,
                     filename=filename,
+                    stash_name=stash_name,
                     md5=md5_hash.hexdigest(),
                     sha256=sha256_hash.hexdigest(),
                     size=f.size,
@@ -74,12 +73,13 @@ def upload(request):
                 )
                 saved_files.append(uploaded_file)
                 links.append(f"localhost:8000/uploads/{filename}")
-            links = [f"/uploads/{file.filename}" for file in saved_files]
+            links = [f"/uploads/{file.stash_name}" for file in saved_files]
             if saved_files:
                 message = f"Uploaded {len(saved_files)} file(s) successfully."
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
-    total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.filename)) for f in all_files)
+    total_size = sum(
+    os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
 
     user_files = UploadedFile.objects.filter(ip_address=user_ip).order_by('-uploaded_at')[:10]
     return render(request, "upload.html", {
@@ -93,17 +93,23 @@ def upload(request):
 
 
 
-def f(request, file_name):
-    uploaded_file = get_object_or_404(UploadedFile, filename=file_name)
-    file_path = os.path.join(UPLOAD_DIR, uploaded_file.filename)  # use .filename
-
-
+def f(request, stash_name):
+    # Find file by stash_name
+    uploaded_file = get_object_or_404(UploadedFile, stash_name=stash_name)
+    
+    # Full path on disk
+    file_path = os.path.join(UPLOAD_DIR, uploaded_file.stash_name)
+    
+    # Use saved MIME type
     mime_type = uploaded_file.mime_type or 'application/octet-stream'
+    
 
-    as_attachment = not mime_type.startswith(("image/", "video/"))
-
-    return FileResponse(open(file_path, "rb"), content_type=mime_type, as_attachment=as_attachment)
-
+    return FileResponse(
+        open(file_path, 'rb'),
+        content_type=mime_type,
+        as_attachment=False,
+        filename=uploaded_file.filename
+    )
 
 def get_client_ip(request):
     """Return the real IP of the client."""

@@ -56,7 +56,7 @@
                             <tbody>
                                 {% for file in uploaded_files %}
                                 <tr>
-                                    <td><a href="/f/{{ file.filename }}" target="_blank">{{ file.filename }}</a></td>
+                                    <td><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></td>
                                     <td>{{ file.size|filesizeformat }}</td>
                                     <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
                                     <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
@@ -91,7 +91,7 @@
                     <tbody>
                         {% for file in user_files %}
                         <tr>
-                            <th scope="row"><a href="/f/{{ file.filename }}" target="_blank">{{ file.filename }}</a></th>
+                            <th scope="row"><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></th>
                             <td>{{ file.size|filesizeformat }}</td>
                         </tr>
                         {% endfor %}
