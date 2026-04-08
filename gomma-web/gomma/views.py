@@ -27,13 +27,16 @@ def upload(request):
         saved_files = []
         if len(request.FILES.getlist("file[]")) > 50:
             error_message = "Too many files"
-        else:
+        elif:
+	    if len(request.FILES.getlist("file[]" < 1:
+	        error_message = "Upload a file"
+	else:
             try:
                 saved_files = save_file(request.FILES.getlist("file[]"),request.POST.get("name", "").strip(),user_ip)
                 links = [f"/uploads/{file.stash_name}" for file in saved_files]
                 message = f"Uploaded {len(saved_files)} file(s) successfully."
             except Exception as e:
-                message = e
+                error_message = e
 
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
