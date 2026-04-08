@@ -1,6 +1,6 @@
 #uploads
 gomma-web/uploads/
-
+staticfiles/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
