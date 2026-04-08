@@ -1,6 +1,5 @@
 # gömma
-Gömma
+gömma
+/jœmːa/
 
-pretty heavily vibe coded
-
-sorry about that
+place where things are hidden or stashed away
