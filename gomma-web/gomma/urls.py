@@ -21,6 +21,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('',views.upload),
+    path('admin/', admin.site.urls),
+    path('gomma/',views.upload, name="upload"),
     path("f/<str:stash_name>/", views.f, name="f"),
 ]    

@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a href="/" class="navbar-brand">Gömma</a>
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item mx-1"><a href="/" class="nav-link">Gömma</a></li>
+            <li class="nav-item mx-1"><a href="/gomma/" class="nav-link">Gömma</a></li>
         </ul>
     </nav>
 
@@ -28,7 +28,7 @@
                 <div class="card">
                     <div class="card-header">Upload to Gömma</div>
                     <div class="card-body">
-                        <form method="post" action="/" enctype="multipart/form-data">
+                        <form method="post" action="/gomma/" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="custom-file mb-3">
                                 <input type="file" id="fileinput" multiple name="file[]" onchange="updateFileField()" class="btn custom-file-input">
@@ -38,7 +38,7 @@
                                 <label>Name:</label>
                                 <input type="text" name="name" placeholder="[Leave empty for random]" class="form-control" minlength="1" maxlength="32">
                                 <small class="form-text text-muted">
-                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>gm.hehexd.fi/f/[namehere]</b> )
+                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
                             </small>
                             </div>
                             <input type="submit" name="upload" value="Upload" class="btn btn-success btn-block my-3">
