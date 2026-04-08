@@ -22,59 +22,61 @@ def upload(request):
     user_ip = get_client_ip(request)
     if request.method == "POST":
         saved_files = []
-        
-        for f in request.FILES.getlist("file[]"):
+        if len(request.FILES.getlist("file[]")) > 50:
+            message = "Too many files"
+        else:
+            for f in request.FILES.getlist("file[]"):
 
-            if f.size > MAX_SIZE:
-                message = f"File {f.name} too large"
-                break
-            
-            
-            mime_type, _ = mimetypes.guess_type(f.name)
-            print(f.name)
-            print(mime_type)
-            mime_type = mime_type or 'application/octet-stream'
+                if f.size > MAX_SIZE:
+                    message = f"File {f.name} too large"
+                    break
+                
+                
+                mime_type, _ = mimetypes.guess_type(f.name)
+                print(f.name)
+                print(mime_type)
+                mime_type = mime_type or 'application/octet-stream'
 
 
-            user_specified_name = request.POST.get("name", "").strip()
+                user_specified_name = request.POST.get("name", "").strip()
 
-            if not user_specified_name :
-                filename = ''.join(random.choice(letters) for i in range(5))
-            else:
-                filename = user_specified_name
-            file_path = os.path.join(UPLOAD_DIR, filename)    
+                if not user_specified_name :
+                    filename = ''.join(random.choice(letters) for i in range(5))
+                else:
+                    filename = user_specified_name
+                file_path = os.path.join(UPLOAD_DIR, filename)    
 
-            while os.path.exists(file_path):
-                filename = filename + str(random.randrange(1,10))
-                file_path = os.path.join(UPLOAD_DIR, filename)
-            
-            # Save file to disk
-            with open(file_path, "wb+") as destination:
-                for chunk in f.chunks():
-                    destination.write(chunk)
+                while os.path.exists(file_path):
+                    filename = filename + str(random.randrange(1,10))
+                    file_path = os.path.join(UPLOAD_DIR, filename)
+                
+                # Save file to disk
+                with open(file_path, "wb+") as destination:
+                    for chunk in f.chunks():
+                        destination.write(chunk)
 
-            # Compute hashes
-            md5_hash = hashlib.md5()
-            sha256_hash = hashlib.sha256()
-            with open(file_path, "rb") as file_to_hash:
-                for chunk in iter(lambda: file_to_hash.read(4096), b""):
-                    md5_hash.update(chunk)
-                    sha256_hash.update(chunk)
+                # Compute hashes
+                md5_hash = hashlib.md5()
+                sha256_hash = hashlib.sha256()
+                with open(file_path, "rb") as file_to_hash:
+                    for chunk in iter(lambda: file_to_hash.read(4096), b""):
+                        md5_hash.update(chunk)
+                        sha256_hash.update(chunk)
 
-            # Save to database
-            uploaded_file = UploadedFile.objects.create(
-                ip_address = user_ip,
-                filename=filename,
-                md5=md5_hash.hexdigest(),
-                sha256=sha256_hash.hexdigest(),
-                size=f.size,
-                mime_type=mime_type
-            )
-            saved_files.append(uploaded_file)
-            links.append(f"localhost:8000/uploads/{filename}")
-        links = [f"/uploads/{file.filename}" for file in saved_files]
-        if saved_files:
-            message = f"Uploaded {len(saved_files)} file(s) successfully."
+                # Save to database
+                uploaded_file = UploadedFile.objects.create(
+                    ip_address = user_ip,
+                    filename=filename,
+                    md5=md5_hash.hexdigest(),
+                    sha256=sha256_hash.hexdigest(),
+                    size=f.size,
+                    mime_type=mime_type
+                )
+                saved_files.append(uploaded_file)
+                links.append(f"localhost:8000/uploads/{filename}")
+            links = [f"/uploads/{file.filename}" for file in saved_files]
+            if saved_files:
+                message = f"Uploaded {len(saved_files)} file(s) successfully."
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
     total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.filename)) for f in all_files)
