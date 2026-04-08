@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Gömma</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" crossorigin="anonymous">
@@ -11,126 +12,164 @@
         }
     </style>
 </head>
+
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a href="/" class="navbar-brand">Gömma</a>
-    <ul class="navbar-nav mr-auto">
-        <li class="nav-item mx-1"><a href="/gomma/" class="nav-link">Gömma</a></li>
-    </ul>
-</nav>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a href="/" class="navbar-brand">Gömma</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item mx-1"><a href="/gomma/" class="nav-link">Gömma</a></li>
+        </ul>
+    </nav>
 
-<div class="container mt-5">
+    <div class="container mt-5">
 
-    <div class="row">
-        <div class="col-7">
-            <div class="card">
-                <div class="card-header">Upload to Gömma</div>
-                <div class="card-body">
-                    <form method="post" action="/gomma/" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="custom-file mb-3">
-                            <input type="file" id="fileinput" multiple name="file[]" onchange="updateFileField()" class="btn custom-file-input">
-                            <label class="custom-file-label" id="filesdesc">Choose files to upload</label>
-                        </div>
-                        <div class="form-group">
-                            <label>Name:</label>
-                            <input type="text" name="name" placeholder="[Leave empty for random]" class="form-control" minlength="1" maxlength="32">
-                            <small class="form-text text-muted">
-                                <b>3-32 characters</b6X>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
+        <div class="row">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-header">Upload to Gömma</div>
+                    <div class="card-body">
+                        <form method="post" action="/gomma/" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="custom-file mb-3">
+                                <input type="file" id="fileinput" multiple name="file[]" onchange="updateFileField()" class="btn custom-file-input">
+                                <label class="custom-file-label" id="filesdesc">Choose files to upload</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <input type="text" name="name" placeholder="[Leave empty for random]" class="form-control" minlength="1" maxlength="32">
+                                <small class="form-text text-muted">
+                                <b>3-32 characters</b>, it will be part of the shortened link ( <b>localhost/gomma/[namehere]</b> )
                             </small>
-                        </div>
-                        <input type="submit" name="upload" value="Upload" class="btn btn-success btn-block my-3">
-                    </form>
-                    {% if error_message %}
-                    <div class="alert alert-danger mt-3">{{ error_message }}</div>
-                    {% endif %}
-                    {% if message %}
-                    <div class="alert alert-success mt-3">{{ message }}</div>
-                    <table class="table table-striped mt-2">
-                        <thead>
-                            <tr>
-                                <th>Filename</th>
-                                <th>Size</th>
-                                <th>MD5</th>
-                                <th>SHA256</th>
-                                <th>Uploaded At</th>
-                                <th>Actions</th> <!-- New column for buttons -->
-                            </tr>
-                        </thead>
-                        <tbody>
+                            </div>
+                            <input type="submit" name="upload" value="Upload" class="btn btn-success btn-block my-3">
+                        </form>
+                        {% if error_message %}
+                        <div class="alert alert-danger mt-3">{{ error_message }}</div>
+                        {% endif %} 
+                        {% if message %} 
+                        <div class="alert alert-success mt-3">{{ message }}</div>
+                        {% endif %}
+                        {% if uploaded_files %}
+                        <div class="mt-3">
+                            <h5>Actions:</h5>
                             {% for file in uploaded_files %}
-                            <tr>
-                                <td>{{ file.filename }}</td>
-                                <td>{{ file.size|filesizeformat }}</td>
-                                <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
-                                <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
-                                <td>{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
-                                <td>
-                                    <!-- Open link -->
-                                    <a href="/f/{{ file.stash_name }}" target="_blank" class="btn btn-sm btn-primary mb-1">Open Link</a>
-                                    
-                                    <!-- Copy link -->
-                                    <button class="btn btn-sm btn-secondary mb-1" onclick="copyLink('/f/{{ file.stash_name }}')">Copy Link</button>
-                                </td>
-                            </tr>
+                            <div class="mb-2">
+                                <a href="/f/{{ file.stash_name }}" target="_blank" class="btn btn-sm btn-primary mb-1">Download</a>
+
+                                <button type="button" class="btn copy-btn btn-sm btn-secondary mb-1" data-clipboard-text="{{ request.scheme }}://{{ request.get_host }}/f/{{ file.stash_name }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link">
+                                Copy Link
+                            </button>
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                    {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                        <table class="table table-striped mt-2">
+                            <thead>
+                                <tr>
+                                    <th>Filename</th>
+                                    <th>Size</th>
+                                    <th>MD5</th>
+                                    <th>SHA256</th>
+                                    <th>Uploaded At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in uploaded_files %}
+                                <tr>
+                                    <td>{{ file.filename }}</td>
+                                    <td>{{ file.size|filesizeformat }}</td>
+                                    <td class="selectall text-truncate" style="max-width: 120px;" title="{{ file.md5 }}"><code>{{ file.md5 }}</code></td>
+                                    <td class="selectall text-truncate" style="max-width: 200px;" title="{{ file.sha256 }}"><code>{{ file.sha256 }}</code></td>
+                                    <td>{{ file.uploaded_at|date:"Y-m-d H:i:s" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+
+            
+            <div class="col-5">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-body">
+							<p>Uploads: <b>{{ total_uploads }}</b></p>
+                            <p>Data stored: <b>{{ total_size|filesizeformat }}</b></p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+            
+			<div class="row mt-3 mb-5">
+				<div class="col-12">
+					<div class="card">
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">Your recent uploads</th>
+									<th scope="col">Size</th>
+								</tr>
+							</thead>
+							<tbody>
+							{% for file in user_files %}
+                                    <tr>
+                                        <th scope="row"><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></th>
+                                        <td>{{ file.size|filesizeformat }}</td>
+                                    </tr>
+                            {% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
         </div>
 
-        <div class="col-5">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <hr>
-                    <p>Uploads: <b>{{ total_uploads }}</b></p>
-                    <p>Data stored: <b>{{ total_size|filesizeformat }}</b></p>
-                    <hr>
-                </div>
-            </div>
-
-            <div class="card">
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            <th scope="col">Your recent uploads</th>
-                            <th scope="col">Size</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for file in user_files %}
-                        <tr>
-                            <th scope="row"><a href="/f/{{ file.stash_name }}" target="_blank">{{ file.filename }}</a></th>
-                            <td>{{ file.size|filesizeformat }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function updateFileField(){
-    var numFiles = $("#fileinput").prop("files").length;
-    if(numFiles == 1){
-        $("#filesdesc").html($("#fileinput").val().split('\\').pop());
-    } else{
-        $("#filesdesc").html(numFiles+" files selected");
-    }
-}
-</script>
-<script>
-function copyLink(link){
-    navigator.clipboard.writeText(window.location.origin + link).then(function() {
-        alert("Copied to clipboard: " + window.location.origin + link);
-    }, function(err) {
-        alert("Failed to copy: " + err);
-    });
-}
-</script>
+            <script>
+                function updateFileField(){
+                    var numFiles = $("#fileinput").prop("files").length;
+                    if(numFiles == 1){
+                        $("#filesdesc").html($("#fileinput").val().split('\\').pop());
+                    } else{
+                        $("#filesdesc").html(numFiles+" files selected");
+                    }
+                }
+            </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl)
+                    })
+                
+                    // ClipboardJS
+                    var clipboard = new ClipboardJS('.copy-btn');
+                
+                    $(function () {
+                    $('[data-toggle="tooltip"]').tooltip();
+                    });
+                
+                    $('.copy-btn').click(function() {
+                    var $btn = $(this);
+                    $btn.tooltip('hide')
+                        .attr('data-original-title', 'Copied!') // change text
+                        .tooltip('show');
+                
+                    setTimeout(function() {
+                        $btn.tooltip('hide')
+                            .attr('data-original-title', 'Copy link');
+                    }, 3000);
+                    });
+                });
+            </script>
 </body>
+
 </html>
