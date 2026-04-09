@@ -5,6 +5,7 @@ import io
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, FileResponse
+from django.template.defaultfilters import slugify
 from .models import UploadedFile
 from django.middleware.csrf import get_token
 import random,string
@@ -115,7 +116,7 @@ def save_file(files,stash_name,ip):
     if len(files) > 1:
         if not stash_name:
             stash_name = ''.join(random.choice(letters) for _ in range(5))
-
+        stash_name = slugify(stash_name)
         zip_path = os.path.join(UPLOAD_DIR, stash_name)
 
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
@@ -148,7 +149,7 @@ def save_file(files,stash_name,ip):
 
     if not stash_name:
         stash_name = ''.join(random.choice(letters) for _ in range(5))
-
+    stash_name = slugify(stash_name)
     file_path = os.path.join(UPLOAD_DIR, stash_name)
 
     with open(file_path, "wb+") as destination:
