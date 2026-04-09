@@ -76,7 +76,8 @@ def upload(request):
 
 
 
-def f(request, stash_name):
+def f(stash_name):
+    """ Download request"""
     uploaded_file = get_object_or_404(UploadedFile, stash_name=stash_name)
     attachment = True
     file_path = os.path.join(UPLOAD_DIR, uploaded_file.stash_name)
@@ -117,7 +118,12 @@ def save_file(files,stash_name,ip):
         if not stash_name:
             stash_name = ''.join(random.choice(letters) for _ in range(5))
         stash_name = slugify(stash_name)
+        stash_name = f"{stash_name}.zip"
         zip_path = os.path.join(UPLOAD_DIR, stash_name)
+
+        while os.path.exists(zip_path):
+            stash_name = f"{random.randrange(1,10)}_{stash_name}"
+            zip_path = os.path.join(UPLOAD_DIR, stash_name)
 
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             for f in files:
@@ -133,7 +139,7 @@ def save_file(files,stash_name,ip):
 
         uploaded_file = UploadedFile.objects.create(
             ip_address=ip,
-            filename=f"{stash_name}.zip",
+            filename=stash_name,
             stash_name=stash_name,
             md5=md5_hash.hexdigest(),
             sha256=sha256_hash.hexdigest(),
@@ -152,6 +158,10 @@ def save_file(files,stash_name,ip):
     stash_name = slugify(stash_name)
     file_path = os.path.join(UPLOAD_DIR, stash_name)
 
+    while os.path.exists(file_path):
+        stash_name = f"{random.randrange(1,10)}_{stash_name}"
+        file_path = os.path.join(UPLOAD_DIR, stash_name)
+    
     with open(file_path, "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
