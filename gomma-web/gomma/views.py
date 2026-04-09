@@ -76,7 +76,7 @@ def upload(request):
 
 
 
-def f(stash_name):
+def f(request, stash_name):
     """ Download request"""
     uploaded_file = get_object_or_404(UploadedFile, stash_name=stash_name)
     attachment = True
