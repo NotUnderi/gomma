@@ -13,6 +13,28 @@ import mimetypes
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+SAFE_MIME_TYPES = [
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+    "image/avif",
+    "image/bmp",
+
+    "text/plain",
+    "text/csv",
+    "application/json",
+
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/wav",
+    "audio/webm",
+
+    "video/mp4",
+    "video/webm",
+    "video/ogg",
+]
+
 MAX_SIZE = 1024 * 1024 * 1024 #1024mb
 letters = string.ascii_lowercase
 
@@ -54,22 +76,30 @@ def upload(request):
 
 
 def f(request, stash_name):
-    # Find file by stash_name
     uploaded_file = get_object_or_404(UploadedFile, stash_name=stash_name)
-    
-    # Full path on disk
+    attachment = True
     file_path = os.path.join(UPLOAD_DIR, uploaded_file.stash_name)
     
-    # Use saved MIME type
-    mime_type = uploaded_file.mime_type or 'application/octet-stream'
+    if uploaded_file.mime_type in SAFE_MIME_TYPES:
+        mime_type = uploaded_file.mime_type
+        attachment = False
+    else:
+        mime_type = 'application/octet-stream'
+        attachment = True
     
 
-    return FileResponse(
+    response = FileResponse(
         open(file_path, 'rb'),
         content_type=mime_type,
-        as_attachment=False,
+        as_attachment=attachment,
         filename=uploaded_file.filename
     )
+    if not attachment and mime_type.startswith("image/"):
+        response["Content-Security-Policy"] = "default-src 'none'; img-src 'self' data:;"
+    else:
+        response["Content-Security-Policy"] = "default-src 'none';"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 def get_client_ip(request):
     """Return the real IP of the client."""
@@ -135,7 +165,10 @@ def save_file(files,stash_name,ip):
             sha256_hash.update(chunk)
 
     mime_type, _ = mimetypes.guess_type(f.name)
-    mime_type = mime_type or 'application/octet-stream'
+    if mime_type in SAFE_MIME_TYPES:
+        pass
+    else:
+        mime_type = 'application/octet-stream'
 
     uploaded_file = UploadedFile.objects.create(
         ip_address=ip,
