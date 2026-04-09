@@ -122,7 +122,7 @@
 							<tbody>
 							{% for file in user_files %}
                                     <tr>
-                                        <th scope="row"><a href="/f/{{ file.stash_name }}/info" target="_blank">{{ file.filename }}</a></th>
+                                        <th scope="row"><a href="/f/{{ file.stash_name }}/info">{{ file.filename }}</a></th>
                                         <td>{{ file.size|filesizeformat }}</td>
                                     </tr>
                             {% endfor %}
