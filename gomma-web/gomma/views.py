@@ -112,7 +112,6 @@ def get_client_ip(request):
 
 def save_file(files,stash_name,ip):
     saved_files = []
-
     if len(files) > 1:
         if not stash_name:
             stash_name = ''.join(random.choice(letters) for _ in range(5))
@@ -133,7 +132,7 @@ def save_file(files,stash_name,ip):
 
         uploaded_file = UploadedFile.objects.create(
             ip_address=ip,
-            filename="gömma.zip",
+            filename=f"{stash_name}.zip",
             stash_name=stash_name,
             md5=md5_hash.hexdigest(),
             sha256=sha256_hash.hexdigest(),
@@ -144,7 +143,7 @@ def save_file(files,stash_name,ip):
         saved_files.append(uploaded_file)
         return saved_files
     
-
+    
     f = files[0]
 
     if not stash_name:
