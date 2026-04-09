@@ -74,6 +74,24 @@ def upload(request):
         "total_size": total_size
     })
 
+def info(request, stash_name):
+    """Info page for file"""
+    requested_file = get_object_or_404(UploadedFile, stash_name=stash_name)
+
+    all_files = UploadedFile.objects.all()
+    total_uploads = all_files.count()
+    total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
+    user_files = UploadedFile.objects.filter(ip_address=get_client_ip(request)).order_by('-uploaded_at')[:10]
+    
+    return render(request, "upload.html", {
+        "message": "",
+        "error_message": "",
+        "uploaded_files": [requested_file],
+        "links": f"/uploads/{requested_file.stash_name}",
+        "user_files": user_files[:10],
+        "total_uploads": total_uploads,
+        "total_size": total_size
+    })
 
 
 def f(request, stash_name):

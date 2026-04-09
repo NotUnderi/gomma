@@ -23,4 +23,5 @@ from . import views
 urlpatterns = [
     path('',views.upload, name="upload"),
     path("f/<str:stash_name>/", views.f, name="f"),
+    path("f/<str:stash_name>/info", views.info, name="info"),
 ]    

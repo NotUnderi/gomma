@@ -55,10 +55,14 @@
                             {% for file in uploaded_files %}
                             <div class="mb-2">
                                 <a href="/f/{{ file.stash_name }}" target="_blank" class="btn btn-sm btn-primary mb-1">Download</a>
-
-                                <button type="button" class="btn copy-btn btn-sm btn-secondary mb-1" data-clipboard-text="{{ request.scheme }}://{{ request.get_host }}/f/{{ file.stash_name }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link">
+                                
+                                <button type="button" class="btn copy-btn btn-sm btn-primary mb-1" data-clipboard-text="{{ request.scheme }}://{{ request.get_host }}/f/{{ file.stash_name }}/info" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link">
                                 Copy Link
-                            </button>
+                                </button>
+                                
+                                <button type="button" class="btn copy-btn btn-sm btn-secondary mb-1" data-clipboard-text="{{ request.scheme }}://{{ request.get_host }}/f/{{ file.stash_name }}" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link">
+                                Copy Direct Link
+                                </button>
                             </div>
                             {% endfor %}
                         </div>
