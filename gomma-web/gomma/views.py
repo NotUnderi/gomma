@@ -7,7 +7,6 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, FileResponse
 from django.template.defaultfilters import slugify
-from httpcore import request
 from .models import UploadedFile
 from django.middleware.csrf import get_token
 import random,string
