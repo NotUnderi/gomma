@@ -2,14 +2,17 @@ import os
 import hashlib
 import zipfile
 import io
+import django
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, FileResponse
 from django.template.defaultfilters import slugify
+from httpcore import request
 from .models import UploadedFile
 from django.middleware.csrf import get_token
 import random,string
 import mimetypes
+from datetime import datetime as dt
 
 UPLOAD_DIR = os.path.join(settings.BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -44,8 +47,9 @@ def upload(request):
     error_message=""
     links=[]
     saved_files = []  
-    user_ip = get_client_ip(request)
-
+    if not request.session.session_key:
+        request.session.create()    
+    user_id = request.session.session_key
     if request.method == "POST":
         saved_files = []
         if len(request.FILES.getlist("file[]")) > 50:
@@ -54,7 +58,7 @@ def upload(request):
             error_message = "Upload a file"
         else:
             try:
-                saved_files = save_file(request.FILES.getlist("file[]"),request.POST.get("name", "").strip(),user_ip)
+                saved_files = save_file(request.FILES.getlist("file[]"),request.POST.get("name", "").strip(),user_id)
                 links = [f"/uploads/{file.stash_name}" for file in saved_files]
                 message = f"Uploaded {len(saved_files)} file(s) successfully."
             except Exception as e:
@@ -63,7 +67,7 @@ def upload(request):
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
     total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
-    user_files = UploadedFile.objects.filter(ip_address=user_ip).order_by('-uploaded_at')[:10]
+    user_files = UploadedFile.objects.filter(id=user_id).order_by('-uploaded_at')[:10]
     return render(request, "upload.html", {
         "message": message,
         "error_message": error_message,
@@ -78,10 +82,14 @@ def info(request, stash_name):
     """Info page for file"""
     requested_file = get_object_or_404(UploadedFile, stash_name=stash_name)
 
+    if not request.session.session_key:
+        request.session.create()    
+    user_id = request.session.session_key
+
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
     total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
-    user_files = UploadedFile.objects.filter(ip_address=get_client_ip(request)).order_by('-uploaded_at')[:10]
+    user_files = UploadedFile.objects.filter(id=user_id).order_by('-uploaded_at')[:10]
     
     return render(request, "upload.html", {
         "message": "",
@@ -130,7 +138,7 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-def save_file(files,stash_name,ip):
+def save_file(files,stash_name,user_id):
     saved_files = []
     if len(files) > 1:
         if not stash_name:
@@ -156,7 +164,7 @@ def save_file(files,stash_name,ip):
                 sha256_hash.update(chunk)
 
         uploaded_file = UploadedFile.objects.create(
-            ip_address=ip,
+            id=user_id,
             filename=stash_name,
             stash_name=stash_name,
             md5=md5_hash.hexdigest(),
@@ -199,7 +207,7 @@ def save_file(files,stash_name,ip):
         mime_type = 'application/octet-stream'
 
     uploaded_file = UploadedFile.objects.create(
-        ip_address=ip,
+        id=user_id,
         filename=f.name,
         stash_name=stash_name,
         md5=md5_hash.hexdigest(),

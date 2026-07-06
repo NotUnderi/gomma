@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 class UploadedFile(models.Model):
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    id = models.AutoField(primary_key=True)
     filename = models.CharField(max_length=255)
     stash_name = models.CharField(max_length=255, null=True, blank=True)
     md5 = models.CharField(max_length=32)
