@@ -66,7 +66,7 @@ def upload(request):
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
     total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
-    user_files = UploadedFile.objects.filter(id=user_id).order_by('-uploaded_at')[:10]
+    user_files = UploadedFile.objects.filter(user_id=user_id).order_by('-uploaded_at')[:10]
     return render(request, "upload.html", {
         "message": message,
         "error_message": error_message,
@@ -88,7 +88,7 @@ def info(request, stash_name):
     all_files = UploadedFile.objects.all()
     total_uploads = all_files.count()
     total_size = sum(os.path.getsize(os.path.join(UPLOAD_DIR, f.stash_name))for f in all_files if f.stash_name)
-    user_files = UploadedFile.objects.filter(id=user_id).order_by('-uploaded_at')[:10]
+    user_files = UploadedFile.objects.filter(user_id=user_id).order_by('-uploaded_at')[:10]
     
     return render(request, "upload.html", {
         "message": "",
@@ -163,7 +163,7 @@ def save_file(files,stash_name,user_id):
                 sha256_hash.update(chunk)
 
         uploaded_file = UploadedFile.objects.create(
-            id=user_id,
+            user_id=user_id,
             filename=stash_name,
             stash_name=stash_name,
             md5=md5_hash.hexdigest(),
@@ -206,7 +206,7 @@ def save_file(files,stash_name,user_id):
         mime_type = 'application/octet-stream'
 
     uploaded_file = UploadedFile.objects.create(
-        id=user_id,
+        user_id=user_id,
         filename=f.name,
         stash_name=stash_name,
         md5=md5_hash.hexdigest(),
